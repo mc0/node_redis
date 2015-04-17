@@ -1,6 +1,11 @@
 Changelog
 =========
 
+## v0.13.0
+
+* Added RedisCluster for cluster support (Mark Caudill)
+* Cleaned up formatting and optimized code paths (Mark Caudill)
+* Allow max_retries to be 0 to never retry (Mark Caudill)
 * Fix extraneous error output due to pubsub tests (Mikael Kohlmyr)
 
 ## v0.12.1 - Aug 10, 2014

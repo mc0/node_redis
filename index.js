@@ -3,6 +3,7 @@
 var net = require("net"),
     util = require("./lib/util"),
     Queue = require("./lib/queue"),
+    RedisCluster = require("./lib/redisCluster"),
     to_array = require("./lib/to_array"),
     events = require("events"),
     crypto = require("crypto"),
@@ -15,6 +16,9 @@ var net = require("net"),
 
 // can set this to true to enable for all connections
 exports.debug_mode = false;
+
+// expose the RedisCluster implementation
+exports.RedisCluster = RedisCluster;
 
 function trace() {
     if (!exports.debug_mode) {
@@ -190,11 +194,12 @@ RedisClient.prototype.flush_and_error = function(message) {
 
 RedisClient.prototype.on_error = function(msg) {
     var errMessage = msg.message || msg,
-        message = "Redis connection to " + this.address + " failed - " + errMessage;
+        message;
 
     if (this.closing) {
         return;
     }
+    message = "Redis connection to " + this.address + " failed - " + errMessage;
 
     if (exports.debug_mode) {
         console.warn(message);
@@ -397,12 +402,11 @@ RedisClient.prototype.on_ready = function() {
 };
 
 RedisClient.prototype.on_info_cmd = function(err, res) {
-    var self = this,
-        obj = {},
+    var obj = {},
         lines, retry_time;
 
     if (err) {
-        return self.emit("error", new Error("Ready check failed: " + err.message));
+        return this.emit("error", new Error("Ready check failed: " + err.message));
     }
 
     lines = res.toString().split("\r\n");
@@ -438,8 +442,8 @@ RedisClient.prototype.on_info_cmd = function(err, res) {
             console.log("Redis server still loading, trying again in " + retry_time);
         }
         setTimeout(function() {
-            self.ready_check();
-        }, retry_time);
+            this.ready_check();
+        }.bind(this), retry_time);
     }
 };
 

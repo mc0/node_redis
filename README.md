@@ -121,9 +121,9 @@ JavaScript Array of node Buffers.  `HGETALL` returns an Object with Buffers keye
 
 # API
 
-## Connection Events
+`RedisClient` inherits from `EventEmitter` and will emit some events about the state of the connection to the Redis server.
 
-`client` will emit some events about the state of the connection to the Redis server.
+## Connection Events
 
 ### "ready"
 
@@ -658,9 +658,35 @@ client.zadd(args, function (err, response) {
 });
 ```
 
+### Cluster support
+
+Using RedisCluster should be a straightforward change from a RedisClient implementation. There are some notable differences but it
+should be fairly straightforward. The `end`, `drain` and `idle` events are not emitted on RedisClient. To enable debugging, you
+need to set `RedisCluster.debug` to true.
+
+The possible errors emitted have these error codes:
+```js
+RedisCluster.ERROR_NOT_CLUSTER_COMMAND = 1;
+RedisCluster.ERROR_HIT_MAX_TTL = 2;
+RedisCluster.ERROR_NO_STARTUP_NODES = 3;
+```
+
+Swap out where you are creating the RedisClient with something along the lines of:
+
+```js
+var client = new redis.RedisCluster(arrayOfStartupServers, options, authPassword);
+// Then you can continue to use all of the commands on connection
+// E.g. client.set('key', 'value');
+// arrayOfStartupServers should be in the form:
+// [{host: '127.0.0.1', port: 6379}] or ['127.0.0.1:6379']
+// authPassword is optional but if provided should be a string of the password
+```
+
 ## TODO
 
 Better tests for auth, disconnect/reconnect, and all combinations thereof.
+
+Add tests for RedisCluster.
 
 Stream large set/get values into and out of Redis.  Otherwise the entire value must be in node's memory.
 
@@ -740,5 +766,3 @@ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
-
-![spacer](http://ranney.com/1px.gif)

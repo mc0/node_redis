@@ -3,6 +3,7 @@ Changelog
 
 ## v0.13.0
 
+* Updated commands list (Mark Caudill)
 * Added RedisCluster for cluster support (Mark Caudill)
 * Cleaned up formatting and optimized code paths (Mark Caudill)
 * Allow max_retries to be 0 to never retry (Mark Caudill)
